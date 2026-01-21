@@ -1,7 +1,11 @@
 // src/components/layout/Header.jsx
-import React from "react";
 
-const Header = () => {
+import React from "react";
+import { useParams } from "react-router-dom";
+import {Link} from "react-router-dom";
+// import {products} from "../../data/products"; 
+// Assuming you have a products data file
+const Header = ({cart=[]}) => {
   return (
     <header className="w-full border-b border-gray-300 bg-white">
       
@@ -39,7 +43,7 @@ const Header = () => {
             <span className="ml-2 text-[10px] text-gray-500">▼</span>
           </div>
 
-          <button className="h-full bg-brandBlue text-white px-8 font-medium hover:bg-blue-700 transition-colors">
+          <button className="h-full bg-brandBlue text-white px-8 font-medium bg-blue-700 transition-colors">
             Search
           </button>
         </div>
@@ -49,7 +53,18 @@ const Header = () => {
           <NavItem src="/Profile.png" label="Profile" />
           <NavItem src="/message.png" label="Message" hideMobile />
           <NavItem src="/Order.png" label="Orders" hideMobile />
-          <NavItem src="/Cart.png" label="My cart" />
+          <Link to="/cart" className="flex flex-col items-center cursor-pointer relative">
+  <div className="relative">
+    <img src="/Cart.png" alt="Cart" className="w-6 h-6" />
+    {/* Only show the red circle if there are items in the cart */}
+    {cart?.length > 0 && (
+  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+    {cart.length}
+  </span>
+)}
+  </div>
+  <span className="text-xs mt-1">Cart</span>
+</Link>
         </div>
 
       </div>

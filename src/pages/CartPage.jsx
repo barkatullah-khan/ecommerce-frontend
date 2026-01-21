@@ -1,102 +1,139 @@
-// // src/pages/CartPage.jsx
-// import React from 'react';
-// import '../App.css';
-// import Header from '../components/Header';
-// import Footer from '../components/Footer';
+import React from 'react';
+import '../App.css';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 
-// const CartPage = () => {
-//   // Mock data for cart items
-//   const cartItems = [
-//     { id: 1, name: "Wireless Headphones", price: 75.99, quantity: 1, image: "bg-gray-400" },
-//     { id: 2, name: "Ergonomic Gaming Mouse", price: 40.00, quantity: 2, image: "bg-gray-500" },
-//   ];
-//   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+const CartPage = ({ cart, setCart }) => {
+  
+  // 1. Calculate subtotal based on REAL cart data
+  const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
 
-//   // Reusable Cart Item component structure for clarity
-//   const CartItem = ({ item }) => (
-//     // Desktop layout (lg:flex) displays item details horizontally
-//     // Mobile layout (flex-col) stacks item details vertically
-//     <div className="flex flex-col sm:flex-row items-center border-b py-4 last:border-b-0">
+  // 2. Function to remove item
+  const removeFromCart = (id) => {
+    setCart(cart.filter(item => item.id !== id));
+  };
+
+  // Optimized CartItem for 400px+ screens
+  const CartItem = ({ item }) => (
+    <div className="flex items-center justify-between border-b py-4 last:border-b-0 w-full gap-2">
       
-//       {/* 1. Image & Name */}
-//       <div className="flex items-center w-full sm:w-2/5 mb-3 sm:mb-0">
-//         <div className={`w-20 h-20 ${item.image} rounded mr-4 shrink-0`}></div>
-//         <span className="font-semibold text-secondary">{item.name}</span>
-//       </div>
+      {/* LEFT: Image and Title Info */}
+      <div className="flex items-center flex-1 min-w-0">
+        <img 
+          src={item.img} 
+          alt={item.title} 
+          className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded border bg-gray-50 mr-3 shrink-0" 
+        />
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold text-secondary text-sm sm:text-base truncate">
+            {item.title}
+      </span>
+        <button 
+          onClick={() => removeFromCart(item.id)}
+            className="text-[11px] sm:text-xs text-left text-red-500 hover:text-red-700 mt-1 font-medium"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
 
-//       {/* 2. Price (Always visible) */}
-//       <span className="w-full sm:w-1/5 text-lg font-bold text-primary mb-3 sm:mb-0">
-//         ${item.price.toFixed(2)}
-//       </span>
+      {/* RIGHT: Price and Quantity */}
+      <div className="flex flex-col items-end shrink-0 ml-2">
+        <span className="text-sm sm:text-lg font-bold text-primary">
+          ${item.price.toFixed(2)}
+        </span>
+        <span className="text-[10px] sm:text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded border mt-1">
+          Qty: 1
+        </span>
+      </div>
+    </div>
+  );
 
-//       {/* 3. Quantity Selector */}
-//       <div className="w-full sm:w-1/5 mb-3 sm:mb-0">
-//         <input type="number" defaultValue={item.quantity} min="1" className="w-16 p-2 border rounded text-center" />
-//       </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Passing cart to Header so the badge works */}
+      <Header cart={cart} />
 
-//       {/* 4. Subtotal & Remove Button */}
-//       <div className="w-full sm:w-1/5 text-right flex flex-col items-end">
-//         <span className="text-lg font-bold">
-//           ${(item.price * item.quantity).toFixed(2)}
-//         </span>
-//         <button className="text-sm text-red-500 hover:text-red-700 mt-1">Remove</button>
-//       </div>
-//     </div>
-//   );
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-secondary mb-6">Your Shopping Cart</h1>
 
-//   return (
-//     <div className="min-h-screen bg-background-light">
-//       <Header />
-
-//       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-//         <h1 className="text-3xl font-bold text-secondary mb-6">Your Shopping Cart</h1>
-
-//         {/* --- Main Layout: Item List (2/3) + Summary (1/3) --- */}
-//         <div className="flex flex-col lg:flex-row gap-8">
-          
-//           {/* 1. Item List (Wider column on desktop) */}
-//           <section className="lg:w-2/3 bg-white p-6 rounded-lg shadow-lg">
-//             {cartItems.map(item => (
-//               <CartItem key={item.id} item={item} />
-//             ))}
+        {cart.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-lg shadow border border-gray-200">
+            <img src="/empty-cart.png" alt="Empty" className="w-32 mx-auto mb-4 opacity-20" />
+            <h2 className="text-xl mb-4 text-gray-500">Your cart is empty</h2>
+            <Link to="/" className="text-blue-600 font-bold hover:underline">
+              ← Go Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8">
             
-//             {/* Continue Shopping Button */}
-//             <div className="mt-6 flex justify-end">
-//               <button className="text-primary hover:text-secondary font-semibold">
-//                 ← Continue Shopping
-//               </button>
-//             </div>
-//           </section>
-
-//           {/* 2. Order Summary (Narrower column on desktop) */}
-//           <aside className="lg:w-1/3 bg-white p-6 rounded-lg shadow-lg h-fit">
-//             <h2 className="text-2xl font-bold border-b pb-3 mb-4">Order Summary</h2>
+            {/* ITEM SECTION */}
+            <section className="lg:w-2/3 bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="hidden sm:grid grid-cols-2 pb-4 border-b text-gray-400 text-sm">
+                <span>Product</span>
+                <span className="text-right">Price</span>
+              </div>
+              
+              {cart.map((item, index) => (
+                <CartItem key={`${item.id}-${index}`} item={item} />
+              ))}
             
-//             <div className="space-y-3 text-lg">
-//               <div className="flex justify-between">
-//                 <span>Subtotal:</span>
-//                 <span className="font-semibold">${subtotal.toFixed(2)}</span>
-//               </div>
-//               <div className="flex justify-between border-b pb-3">
-//                 <span>Shipping Estimate:</span>
-//                 <span className="font-semibold">$10.00</span>
-//               </div>
-//               <div className="flex justify-between pt-3 text-xl font-bold text-secondary">
-//                 <span>Order Total:</span>
-//                 <span className="text-primary">${(subtotal + 10.00).toFixed(2)}</span>
-//               </div>
-//             </div>
+              <div className="mt-6 flex justify-between items-center">
+                <Link to="/" className="text-blue-600 hover:text-blue-800 font-semibold text-sm">
+                  ← Continue Shopping
+                </Link>
+                <button 
+                  onClick={() => setCart([])} 
+                  className="text-gray-400 hover:text-red-500 text-sm"
+                >
+                  Clear Cart
+                </button>
+              </div>
+            </section>
 
-//             <button className="w-full bg-accent text-white py-3 rounded-lg font-bold text-lg mt-6 hover:bg-opacity-90 transition-opacity">
-//               Proceed to Checkout
-//             </button>
-//           </aside>
-//         </div>
-//       </main>
+            {/* SUMMARY SECTION */}
+            <aside className="lg:w-1/3 h-fit sticky top-4">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 className="text-xl font-bold border-b pb-3 mb-4 text-secondary">Order Summary</h2>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-600">
+                  <span>Subtotal:</span>
+                    <span className="font-semibold text-secondary">${subtotal.toFixed(2)}</span>
+                </div>
+                  <div className="flex justify-between text-gray-600">
+                  <span>Shipping:</span>
+                    <span className="font-semibold text-green-600">Free</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600 border-b pb-3">
+                    <span>Tax (GST):</span>
+                    <span className="font-semibold text-secondary">$0.00</span>
+                </div>
+                <div className="flex justify-between pt-3 text-xl font-bold text-secondary">
+                  <span>Order Total:</span>
+                    <span className="text-blue-700">${subtotal.toFixed(2)}</span>
+                  </div>
+                </div>
+                
+                <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-lg mt-6 hover:bg-blue-700 transition-all active:scale-95 shadow-md">
+                  Checkout
+                </button>
+                
+                <div className="mt-4 flex justify-center gap-2">
+                  <img src="/visa.png" alt="visa" className="h-6 opacity-70" />
+                  <img src="/mastercard.png" alt="master" className="h-6 opacity-70" />
+                  <img src="/paypal.png" alt="paypal" className="h-6 opacity-70" />
+                </div>
+              </div>
+            </aside>
 
-//       <Footer />
-//     </div>
-//   );
-// };
+          </div>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
-// export default CartPage;
+export default CartPage;
