@@ -10,61 +10,76 @@ import InquiryForm from "../components/InquiryForm"
 import ExtraServices from "../components/ExtraServices";
 import RegionSuppliers from "../components/RegionSuppliers";
 import NewsLatter from "../components/NewsLatter";
-import RecommendedItems from "../components/RecommendedItems"; // 1. Ensure this is imported
-import { allProducts } from "../Data/products"; // 2. Named import with { }
+import RecommendedItems from "../components/RecommendedItems";
+import { allProducts } from "../Data/products";
 
-const HomePage = ({ onAddToCart,cart }) => {
+// ADDED searchQuery to the props here
+const HomePage = ({ onAddToCart, cart, searchQuery, setsearchQuery }) => {
   
-  // --- 3. DEFINE DATA BEFORE RETURN ---
-  // This solves the "not defined" error
-  const homeData = allProducts.filter(item => item.category === "home");
-  const electronicsData = allProducts.filter(item => item.category === "electronics");
-  const recommendedData = allProducts.filter(item => item.category === "recommended");
-  const dealsData = allProducts.filter(item => item.category === "deals");
+  // 1. First, create a master list of products that match the search
+  const filteredMasterList = allProducts.filter((product) =>
+    product.title.toLowerCase().includes((searchQuery || "").toLowerCase())
+  );
+
+  // 2. Now, filter your categories from the SEARCHED list
+  const homeData = filteredMasterList.filter(item => item.category === "home");
+  const electronicsData = filteredMasterList.filter(item => item.category === "electronics");
+  const recommendedData = filteredMasterList.filter(item => item.category === "recommended");
+  const dealsData = filteredMasterList.filter(item => item.category === "deals");
+
   return (
     <div className="min-h-screen bg-gray-100 relative">
-      <Header cart={cart} />
+      {/* 3. Make sure to pass setSearchQuery to Header in App.jsx (see below) */}
+      <Header cart={cart} setsearchQuery={setsearchQuery} />
       <Navbar />
 
       <main className="max-w-7xl mx-auto lg:px-8 py-6">
-        <Hero />
-        <DealsAndOffer items={dealsData} />
+        {/* If user is searching, maybe hide the Hero and Deals to show results clearly */}
+        {!searchQuery && <Hero />}
+        {!searchQuery && <DealsAndOffer items={dealsData} />}
 
-        {/* Home Section */}
-        <CategorySection
-          title="Home and outdoor"
-          bannerImg="/item-section.jpg"
-          items={homeData}
-          onAddToCart={onAddToCart}
-        />
+        {/* Home Section - only shows items that match the search */}
+        {homeData.length > 0 && (
+          <CategorySection
+            title="Home and outdoor"
+            bannerImg="/item-section.jpg"
+            items={homeData}
+            onAddToCart={onAddToCart}
+          />
+        )}
 
-        {/* Electronics Section */}
-        <CategorySection
-          title="Consumer electronics and gadgets"
-          bannerImg="/mobile2.png"
-          items={electronicsData}
-          onAddToCart={onAddToCart}
-        />
+        {/* Electronics Section - only shows items that match the search */}
+        {electronicsData.length > 0 && (
+          <CategorySection
+            title="Consumer electronics and gadgets"
+            bannerImg="/mobile2.png"
+            items={electronicsData}
+            onAddToCart={onAddToCart}
+          />
+        )}
 
-        <InquiryForm />
+        {!searchQuery && <InquiryForm />}
 
-        {/* 4. USE RECOMMENDED ITEMS COMPONENT */}
-        {/* Pass the data we defined above as a prop */}
-        <RecommendedItems items={recommendedData} />
+        {/* Recommended Items - filtered by search */}
+        {recommendedData.length > 0 && (
+          <RecommendedItems items={recommendedData} />
+        )}
 
-        <ExtraServices />
-        <RegionSuppliers />
+        {/* If NOTHING matches the search */}
+        {filteredMasterList.length === 0 && (
+          <div className="text-center py-20">
+            <h2 className="text-2xl text-gray-500">No products found for "{searchQuery}"</h2>
+          </div>
+        )}
 
+        {!searchQuery && <ExtraServices />}
+        {!searchQuery && <RegionSuppliers />}
       </main>
 
       <NewsLatter />
-
-
       <Footer />
-
     </div>
   );
 };
 
 export default HomePage;
-
